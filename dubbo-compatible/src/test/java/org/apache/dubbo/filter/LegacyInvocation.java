@@ -50,18 +50,22 @@ public class LegacyInvocation implements Invocation {
         return null;
     }
 
+    @Override
     public String getMethodName() {
         return "echo";
     }
 
+    @Override
     public Class<?>[] getParameterTypes() {
         return new Class[]{String.class};
     }
 
+    @Override
     public Object[] getArguments() {
         return new Object[]{arg0};
     }
 
+    @Override
     public Map<String, String> getAttachments() {
         Map<String, String> attachments = new HashMap<String, String>();
         attachments.put(PATH_KEY, "dubbo");
@@ -73,6 +77,7 @@ public class LegacyInvocation implements Invocation {
         return attachments;
     }
 
+    @Override
     public Invoker<?> getInvoker() {
         return null;
     }
@@ -92,10 +97,12 @@ public class LegacyInvocation implements Invocation {
         return null;
     }
 
+    @Override
     public String getAttachment(String key) {
         return getAttachments().get(key);
     }
 
+    @Override
     public String getAttachment(String key, String defaultValue) {
         return getAttachments().get(key);
     }

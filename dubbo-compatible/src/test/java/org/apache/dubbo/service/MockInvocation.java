@@ -61,6 +61,7 @@ public class MockInvocation implements Invocation {
         return null;
     }
 
+    @Override
     public String getMethodName() {
         return "echo";
     }
@@ -70,14 +71,17 @@ public class MockInvocation implements Invocation {
         return "DemoService";
     }
 
+    @Override
     public Class<?>[] getParameterTypes() {
         return new Class[]{String.class};
     }
 
+    @Override
     public Object[] getArguments() {
         return new Object[]{arg0};
     }
 
+    @Override
     public Map<String, String> getAttachments() {
         return new AttachmentsAdapter.ObjectToStringMap(attachments);
     }
@@ -117,6 +121,7 @@ public class MockInvocation implements Invocation {
         attachments.put(key, value);
     }
 
+    @Override
     public Invoker<?> getInvoker() {
         return null;
     }
@@ -136,6 +141,7 @@ public class MockInvocation implements Invocation {
         return null;
     }
 
+    @Override
     public String getAttachment(String key) {
         return (String) getObjectAttachments().get(key);
     }
@@ -145,6 +151,7 @@ public class MockInvocation implements Invocation {
         return attachments.get(key);
     }
 
+    @Override
     public String getAttachment(String key, String defaultValue) {
         return (String) getObjectAttachments().get(key);
     }

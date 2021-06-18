@@ -24,13 +24,20 @@ import static org.apache.dubbo.rpc.Constants.PROXY_KEY;
 
 /**
  * ProxyFactory. (API/SPI, Singleton, ThreadSafe)
+ *
+ * JavassistProxyFactory   |
+ *                          ---  继承 ---> AbstractProxyFactory  |
+ * JdkProxyFactory         |                                      ---  实现 ---> ProxyFactory
+ *                                      StubProxyFactoryWrapper |
+ *
+ *  由上可以看出 Dubbo 支持 Javassist 和 JDK Proxy 两种方式生成代理
  */
 @SPI("javassist")
 public interface ProxyFactory {
 
     /**
      * create proxy.
-     *
+     *  创建proxy,引用服务时调用[invoker参数表示: COnsumer 对 Provider 调用的Invoker]
      * @param invoker
      * @return proxy
      */
@@ -39,7 +46,7 @@ public interface ProxyFactory {
 
     /**
      * create proxy.
-     *
+     * 创建proxy,引用服务时调用{generic: 区分泛型}
      * @param invoker
      * @return proxy
      */
@@ -48,11 +55,11 @@ public interface ProxyFactory {
 
     /**
      * create invoker.
-     *
+     * 创建Invoker,暴露服务时调用
      * @param <T>
-     * @param proxy
-     * @param type
-     * @param url
+     * @param proxy  Service对象
+     * @param type   Service接口类型
+     * @param url    Service对应的 Dubbo URL
      * @return invoker
      */
     @Adaptive({PROXY_KEY})

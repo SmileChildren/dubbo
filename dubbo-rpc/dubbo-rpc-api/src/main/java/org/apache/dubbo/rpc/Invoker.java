@@ -24,7 +24,11 @@ import org.apache.dubbo.common.Node;
  * @see org.apache.dubbo.rpc.Protocol#refer(Class, org.apache.dubbo.common.URL)
  * @see org.apache.dubbo.rpc.InvokerListener
  * @see org.apache.dubbo.rpc.protocol.AbstractInvoker
- */
+ *
+ *   Invoker 实体域, 代表可执行的实体,可能是本地/远程/集群的一种实现
+ *   主要包含： 服务提供Invoker 和 服务消费Invoker
+ *
+ **/
 public interface Invoker<T> extends Node {
 
     /**

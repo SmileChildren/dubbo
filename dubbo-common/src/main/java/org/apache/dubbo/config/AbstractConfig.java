@@ -117,7 +117,13 @@ public abstract class AbstractConfig implements Serializable {
     public static void appendParameters(Map<String, String> parameters, Object config) {
         appendParameters(parameters, config, null);
     }
-
+    
+    /**
+     * 读取环境变量和 properties 配置到配置对象
+     * @param parameters
+     * @param config
+     * @param prefix
+     */
     @SuppressWarnings("unchecked")
     public static void appendParameters(Map<String, String> parameters, Object config, String prefix) {
         appendParameters0(parameters, config, prefix, true);
@@ -151,6 +157,8 @@ public abstract class AbstractConfig implements Serializable {
                     if (method.getReturnType() == Object.class ) {
                         continue;
                     }
+                    
+                    // 通过计算获取属性名称
                     String key = calculatePropertyFromGetter(name);
                     Parameter parameter = method.getAnnotation(Parameter.class);
                     if (asParameters) {

@@ -70,11 +70,19 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
     protected ServiceMetadata serviceMetadata;
     /**
      * Local impl class name for the service interface
+     *
+     * 服务接口客户端本地代理类名，用于在客户端执行本地逻辑，如本地缓存等。
+     * 该本地代理类的构造函数必须允许传入远程代理对象，构造函数如：public XxxServiceLocal(XxxService xxxService)
+     * 设为 true，表示使用缺省代理类名，即：接口名 + Local 后缀
+     *
      */
     protected String local;
 
     /**
      * Local stub class name for the service interface
+     * 服务接口客户端本地代理类名，用于在客户端执行本地逻辑，如本地缓存等
+     * 该本地代理类的构造函数必须允许传入远程代理对象，构造函数如：public XxxServiceStub(XxxService xxxService)
+     * 设为 true，表示使用缺省代理类名，即：接口名 + Stub 后缀
      */
     protected String stub;
 
@@ -192,8 +200,10 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
 
     /**
      * Check whether the registry config is exists, and then conversion it to {@link RegistryConfig}
+     *  校验 RegisterConfig 配置数组
      */
     protected void checkRegistry() {
+        // 初始化 RegisterConfig 属性信息
         convertRegistryIdsToRegistries();
 
         for (RegistryConfig registryConfig : registries) {
@@ -262,6 +272,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
         computeValidRegistryIds();
         if (StringUtils.isEmpty(registryIds)) {
             if (CollectionUtils.isEmpty(registries)) {
+                // 默认配置
                 List<RegistryConfig> registryConfigs = ApplicationModel.getConfigManager().getDefaultRegistries();
                 registryConfigs = new ArrayList<>(registryConfigs);
                 setRegistries(registryConfigs);
@@ -270,6 +281,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
             String[] ids = COMMA_SPLIT_PATTERN.split(registryIds);
             List<RegistryConfig> tmpRegistries = new ArrayList<>();
             Arrays.stream(ids).forEach(id -> {
+                //
                 if (tmpRegistries.stream().noneMatch(reg -> reg.getId().equals(id))) {
                     Optional<RegistryConfig> globalRegistry = ApplicationModel.getConfigManager().getRegistry(id);
                     if (globalRegistry.isPresent()) {
@@ -324,7 +336,11 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
     }
     
     protected void computeValidRegistryIds() {
+        
+        //  application 不为null 且 RegistryConfig 对象数组为空  且  registryIds 为空
         if (application != null && notHasSelfRegistryProperty()) {
+            
+            // 初始化 RegistryConfig 及 registryIds 信息
             setRegistries(application.getRegistries());
             setRegistryIds(application.getRegistryIds());
         }

@@ -27,6 +27,10 @@ import java.util.stream.Stream;
  * @serial Don't change the class name and package name.
  * @see org.apache.dubbo.rpc.Invoker#invoke(Invocation)
  * @see org.apache.dubbo.rpc.RpcInvocation
+ *
+ * Invocation 会话域,持有调用过程中的变量,比如 方法名、参数等信息
+ *
+ * DecodeableRpcInvocation ---  继承 ---> RpcInvocation --- 实现 ---> Invocation
  */
 public interface Invocation {
 
@@ -78,7 +82,7 @@ public interface Invocation {
 
     /**
      * get attachments.
-     *
+     * 获得隐式参数相关
      * @return attachments.
      * @serial
      */
@@ -132,7 +136,7 @@ public interface Invocation {
 
     /**
      * get the invoker in current context.
-     *
+     *  获取 Invoker 对象
      * @return invoker.
      * @transient
      */

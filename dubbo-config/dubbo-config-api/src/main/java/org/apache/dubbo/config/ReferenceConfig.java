@@ -196,11 +196,15 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
         this.services = services;
     }
 
+    @Override
     public synchronized T get() {
+        
+        // 是否已销毁
         if (destroyed) {
             throw new IllegalStateException("The invoker of ReferenceConfig(" + url + ") has already destroyed!");
         }
 
+        // 初始化操作
         if (ref == null) {
             init();
         }
@@ -208,6 +212,7 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
         return ref;
     }
 
+    @Override
     public synchronized void destroy() {
         if (ref == null) {
             return;
@@ -226,6 +231,8 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
     }
 
     protected synchronized void init() {
+        
+        // 是否已经初始化操作
         if (initialized) {
             return;
         }

@@ -179,7 +179,10 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         }
         unexported = true;
     }
-
+    
+    /**
+     * 暴露服务
+     */
     @Override
     public synchronized void export() {
         if (!shouldExport() || exported) {
@@ -212,10 +215,12 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         if (!shouldExport()) {
             return;
         }
-
+        
+        // 延迟暴露
         if (shouldDelay()) {
             DELAY_EXPORT_EXECUTOR.schedule(this::doExport, getDelay(), TimeUnit.MILLISECONDS);
         } else {
+            // 立即暴露
             doExport();
         }
     }
@@ -305,7 +310,9 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         checkAndUpdateSubConfigs();
     }
 
+    //  执行暴露服务
     protected synchronized void doExport() {
+        // 检查是否可以暴露，若可以，标记已经暴露
         if (unexported) {
             throw new IllegalStateException("The service " + interfaceClass.getName() + " has already unexported!");
         }
@@ -314,13 +321,17 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         }
         exported = true;
 
+        // 服务名为空时设置服务路径为暴露服务的接口名称
         if (StringUtils.isEmpty(path)) {
             path = interfaceName;
         }
         doExportUrls();
         exported();
     }
-
+    
+    /**
+     * 暴露 Dubbo URL
+     */
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void doExportUrls() {
         ServiceRepository repository = ApplicationModel.getServiceRepository();

@@ -25,6 +25,8 @@ import java.util.List;
 
 /**
  * Protocol. (API/SPI, Singleton, ThreadSafe)
+ *
+ * 服务域, 是Invoker 暴露和引用的主功能入口,负责 Invoker 的生命周期管理
  */
 @SPI("dubbo")
 public interface Protocol {
@@ -44,10 +46,15 @@ public interface Protocol {
      * export the same URL<br>
      * 3. Invoker instance is passed in by the framework, protocol needs not to care <br>
      *
-     * @param <T>     Service type
-     * @param invoker Service invoker
-     * @return exporter reference for exported service, useful for unexport the service later
-     * @throws RpcException thrown when error occurs during export the service, for example: port is occupied
+     *  引用远程服务:
+     *  1. 当接收到请求时，协议记录请求的资源地址
+     *  2. export()必须保持幂等性,无论调用次数多少,URL始终如一
+     *  3. 协议不关心Dubbo框架传入的服务执行体
+     *
+     * @param <T>     Service type      服务类型
+     * @param invoker Service invoker   服务执行体
+     * @return exporter reference for exported service, useful for unexport the service later  服务暴露引用,用于取消暴露
+     * @throws RpcException thrown when error occurs during export the service, for example: port is occupied 调用服务异常抛出
      */
     @Adaptive
     <T> Exporter<T> export(Invoker<T> invoker) throws RpcException;
@@ -63,9 +70,9 @@ public interface Protocol {
      *
      * @param <T>  Service type
      * @param type Service class
-     * @param url  URL address for the remote service
-     * @return invoker service's local proxy
-     * @throws RpcException when there's any error while connecting to the service provider
+     * @param url  URL address for the remote service  远程调用服务URL地址
+     * @return invoker service's local proxy           服务本地代理
+     * @throws RpcException when there's any error while connecting to the service provider 连接服务提供方失败时异常抛出
      */
     @Adaptive
     <T> Invoker<T> refer(Class<T> type, URL url) throws RpcException;
@@ -75,6 +82,11 @@ public interface Protocol {
      * 1. Cancel all services this protocol exports and refers <br>
      * 2. Release all occupied resources, for example: connection, port, etc. <br>
      * 3. Protocol can continue to export and refer new service even after it's destroyed.
+     *
+     * 协议销毁/释放：
+     * 1. 取消当前协议的所有已经暴露及引用的服务
+     * 2. 释放占用的资源,比如连接、端口等信息
+     * 3. 协议被销毁后仍旧能提供暴露和引用新的服务
      */
     void destroy();
 

@@ -43,12 +43,16 @@ import java.util.function.Function;
  * @serial Don't change the class name and package name.
  * @see org.apache.dubbo.rpc.Invoker#invoke(Invocation)
  * @see AppResponse
+ *
+ * 会话域  持有调用过程中的返回值、异常等信息
+ *
+ * DecodeableRpcResult ---继承---> RpcResult  ---实现---> Result
  */
 public interface Result extends Serializable {
 
     /**
      * Get invoke result.
-     *
+     *  获取 invoke 返回值
      * @return result. if no result return null.
      */
     Object getValue();
@@ -57,7 +61,7 @@ public interface Result extends Serializable {
 
     /**
      * Get exception.
-     *
+     * 获取异常信息
      * @return exception. if no exception return null.
      */
     Throwable getException();
@@ -66,7 +70,7 @@ public interface Result extends Serializable {
 
     /**
      * Has exception.
-     *
+     * 判断是否包含异常
      * @return has exception.
      */
     boolean hasException();
@@ -81,7 +85,10 @@ public interface Result extends Serializable {
      * return getValue();
      * }
      * </code>
-     *
+     *  设置 result 返回信息{
+     *      AppResponce : 异常存在,设置异常堆栈信息并抛出;不存在,返回getVaule()结果
+     *      AsyncRpcResult : 当RpcInvocation 类型为future时，同步获取异步执行的结果信息
+     *  }
      * @return result.
      * @throws if has exception throw it.
      */
@@ -89,7 +96,7 @@ public interface Result extends Serializable {
 
     /**
      * get attachments.
-     *
+     * 获取隐式参数相关信息
      * @return attachments.
      */
     Map<String, String> getAttachments();
