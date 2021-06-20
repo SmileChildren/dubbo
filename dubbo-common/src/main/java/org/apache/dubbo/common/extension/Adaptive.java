@@ -29,6 +29,8 @@ import java.lang.annotation.Target;
  *
  * @see ExtensionLoader
  * @see URL
+ *
+ * 自适应拓展信息注解标识
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
@@ -41,6 +43,9 @@ public @interface Adaptive {
      * If the specified parameters are not found from {@link URL}, then the default extension will be used for
      * dependency injection (specified in its interface's {@link SPI}).
      * <p>
+     *
+     *     生成自适应拓展名
+     *
      * For example, given <code>String[] {"key1", "key2"}</code>:
      * <ol>
      * <li>find parameter 'key1' in URL, use its value as the extension's name</li>
@@ -53,6 +58,12 @@ public @interface Adaptive {
      * dot '.', for example, for {@code org.apache.dubbo.xxx.YyyInvokerWrapper}, the generated name is
      * <code>String[] {"yyy.invoker.wrapper"}</code>.
      *
+     * 如果不设置则缺省使用Extension接口类名的点分隔小写字串
+     * 即对于Extension接口 {@code com.alibaba.dubbo.xxx.YyyInvokerWrapper} 的缺省值为 <code>String[] {"yyy.invoker.wrapper"}
+     *
+     * 使用方式:
+     * 1. ElementType.TYPE
+     * 2. ElementType.METHOD
      * @return parameter names in URL
      */
     String[] value() default {};
