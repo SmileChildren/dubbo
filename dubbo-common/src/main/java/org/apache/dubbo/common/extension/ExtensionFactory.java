@@ -18,6 +18,12 @@ package org.apache.dubbo.common.extension;
 
 /**
  * ExtensionFactory
+ * 扩展工厂接口
+ *
+ *
+ * SpiExtensionFactory                        |
+ * SpringExtensionFactory                    |--- 实现 ---> ExtensionFactory(SPI注解)
+ * AdaptiveExtensionFactory(Adaptive注解)    |
  */
 @SPI
 public interface ExtensionFactory {
@@ -25,9 +31,11 @@ public interface ExtensionFactory {
     /**
      * Get extension.
      *
-     * @param type object type.
-     * @param name object name.
-     * @return object instance.
+     * @param type object type.  扩展接口
+     * @param name object name.  扩展名
+     * @return object instance.  扩展对象实例
+     *
+     * 获得扩展对象 或 Spring的Bean对象
      */
     <T> T getExtension(Class<T> type, String name);
 

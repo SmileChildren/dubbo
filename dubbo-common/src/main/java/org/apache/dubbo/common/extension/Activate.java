@@ -47,14 +47,21 @@ public @interface Activate {
      * Activate the current extension when one of the groups matches. The group passed into
      * {@link ExtensionLoader#getActivateExtension(URL, String, String)} will be used for matching.
      *
+     *  group 过滤条件
+     *
      * @return group names to match
-     * @see ExtensionLoader#getActivateExtension(URL, String, String)
+     * @see ExtensionLoader#getActivateExtension(URL, String, String) #getActivateExtension(URL url, String key, String group)
      */
     String[] group() default {};
 
     /**
+     *
+     * 激活扩展, 什么时候激活呢？  当指定的key出现在URL参数中时激活
+     *
      * Activate the current extension when the specified keys appear in the URL's parameters.
      * <p>
+     *     Activate 用于配置扩展被自动激活加载条件
+     *     例如 : 配置为@Activate("cache, validation"), 当出现 cache/validation时就会返回扩展
      * For example, given <code>@Activate("cache, validation")</code>, the current extension will be return only when
      * there's either <code>cache</code> or <code>validation</code> key appeared in the URL's parameters.
      * </p>
@@ -68,7 +75,7 @@ public @interface Activate {
     /**
      * Relative ordering info, optional
      * Deprecated since 2.7.0
-     *
+     *  排序信息
      * @return extension list which should be put before the current one
      */
     @Deprecated
@@ -77,7 +84,7 @@ public @interface Activate {
     /**
      * Relative ordering info, optional
      * Deprecated since 2.7.0
-     *
+     *  排序信息
      * @return extension list which should be put after the current one
      */
     @Deprecated
@@ -87,7 +94,7 @@ public @interface Activate {
      * Absolute ordering info, optional
      *
      * Ascending order, smaller values will be in the front o the list.
-     *
+     *  排序信息
      * @return absolute ordering info
      */
     int order() default 0;

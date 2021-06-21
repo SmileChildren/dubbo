@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
  * @see ExtensionLoader
  * @see URL
  *
- * 自适应拓展信息注解标识
+ * 自适应扩展信息注解标识
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
@@ -44,11 +44,11 @@ public @interface Adaptive {
      * dependency injection (specified in its interface's {@link SPI}).
      * <p>
      *
-     *     生成自适应拓展名
+     *     生成自适应扩展名
      *
      * For example, given <code>String[] {"key1", "key2"}</code>:
      * <ol>
-     * <li>find parameter 'key1' in URL, use its value as the extension's name</li>
+     * <li>find parameter 'key1' in URL, use its value as the extension's name</li>Activate
      * <li>try 'key2' for extension's name if 'key1' is not found (or its value is empty) in URL</li>
      * <li>use default extension if 'key2' doesn't exist either</li>
      * <li>otherwise, throw {@link IllegalStateException}</li>
@@ -62,8 +62,8 @@ public @interface Adaptive {
      * 即对于Extension接口 {@code com.alibaba.dubbo.xxx.YyyInvokerWrapper} 的缺省值为 <code>String[] {"yyy.invoker.wrapper"}
      *
      * 使用方式:
-     * 1. ElementType.TYPE
-     * 2. ElementType.METHOD
+     * 1. ElementType.TYPE   : 代表手动实现它是一个扩展接口的 Adaptive扩展实现类,类级别的自适应扩展实现
+     * 2. ElementType.METHOD :  接口方法级别的自适应扩展实现类
      * @return parameter names in URL
      */
     String[] value() default {};

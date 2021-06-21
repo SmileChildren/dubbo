@@ -35,7 +35,10 @@ import java.util.Set;
  */
 public class SpringExtensionFactory implements ExtensionFactory, Lifecycle {
     private static final Logger logger = LoggerFactory.getLogger(SpringExtensionFactory.class);
-
+    
+    /**
+     *  context 集合
+     */
     private static final Set<ApplicationContext> CONTEXTS = new ConcurrentHashSet<ApplicationContext>();
 
     public static void addApplicationContext(ApplicationContext context) {
@@ -70,6 +73,7 @@ public class SpringExtensionFactory implements ExtensionFactory, Lifecycle {
         }
 
         for (ApplicationContext context : CONTEXTS) {
+            // 获取对象
             T bean = BeanFactoryUtils.getOptionalBean(context, name, type);
             if (bean != null) {
                 return bean;

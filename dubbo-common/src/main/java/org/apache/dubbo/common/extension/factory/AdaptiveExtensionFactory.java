@@ -26,13 +26,19 @@ import java.util.List;
 
 /**
  * AdaptiveExtensionFactory
+ *
+ * 默认自适应扩展对象为: SpiExtensionFactory  SpringExtensionFactory
  */
 @Adaptive
 public class AdaptiveExtensionFactory implements ExtensionFactory {
 
+    /**
+     * ExtensionFactory 扩展对象集合
+     */
     private final List<ExtensionFactory> factories;
 
     public AdaptiveExtensionFactory() {
+        // 通过ExtensionLoader 加载扩展对象实现类
         ExtensionLoader<ExtensionFactory> loader = ExtensionLoader.getExtensionLoader(ExtensionFactory.class);
         List<ExtensionFactory> list = new ArrayList<ExtensionFactory>();
         for (String name : loader.getSupportedExtensions()) {
@@ -43,6 +49,7 @@ public class AdaptiveExtensionFactory implements ExtensionFactory {
 
     @Override
     public <T> T getExtension(Class<T> type, String name) {
+        // 获取扩展对象
         for (ExtensionFactory factory : factories) {
             T extension = factory.getExtension(type, name);
             if (extension != null) {
