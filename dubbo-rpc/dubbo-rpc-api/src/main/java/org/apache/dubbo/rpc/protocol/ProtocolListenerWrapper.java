@@ -40,6 +40,7 @@ import static org.apache.dubbo.common.constants.RegistryConstants.REGISTRY_CLUST
 
 /**
  * ListenerProtocol
+ * 监听 Exporter 暴露完成 和 取消暴露完成
  */
 @Activate(order = 200)
 public class ProtocolListenerWrapper implements Protocol {
@@ -60,12 +61,18 @@ public class ProtocolListenerWrapper implements Protocol {
 
     @Override
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
+        
+        
         if (UrlUtils.isRegistry(invoker.getUrl())) {
             return protocol.export(invoker);
         }
-        return new ListenerExporterWrapper<T>(protocol.export(invoker),
-                Collections.unmodifiableList(ExtensionLoader.getExtensionLoader(ExporterListener.class)
-                        .getActivateExtension(invoker.getUrl(), EXPORTER_LISTENER_KEY)));
+        
+        // 包装ExporterListerner 的 Exporter 对象  例: 调用 InjvmProtocol#export(invoker) 方法,暴露本地服务创建InjvmExporter 对象
+        return new ListenerExporterWrapper<T>(
+                // 暴露服务, 创建Exporter
+                protocol.export(invoker),
+                // 获取ExporterListener 集合
+                Collections.unmodifiableList(ExtensionLoader.getExtensionLoader(ExporterListener.class).getActivateExtension(invoker.getUrl(), EXPORTER_LISTENER_KEY)));
     }
 
     @Override

@@ -27,9 +27,15 @@ import org.apache.dubbo.rpc.Invoker;
 public abstract class AbstractExporter<T> implements Exporter<T> {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-
+    
+    /**
+     * invoker 对象
+     */
     private final Invoker<T> invoker;
-
+    
+    /**
+     * 是否取消暴露服务
+     */
     private volatile boolean unexported = false;
 
     public AbstractExporter(Invoker<T> invoker) {
@@ -49,7 +55,10 @@ public abstract class AbstractExporter<T> implements Exporter<T> {
     public Invoker<T> getInvoker() {
         return invoker;
     }
-
+    
+    /**
+     * 取消暴露服务
+     */
     @Override
     final public void unexport() {
         if (unexported) {
@@ -57,11 +66,14 @@ public abstract class AbstractExporter<T> implements Exporter<T> {
         }
         unexported = true;
         getInvoker().destroy();
+        // 子类实现该方法
         afterUnExport();
     }
 
     /**
      * subclasses need to override this method to destroy resources.
+     *
+     * 子类重写该方法释放资源
      */
     public void afterUnExport() {
     }

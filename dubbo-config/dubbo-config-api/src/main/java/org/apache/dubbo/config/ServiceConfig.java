@@ -112,29 +112,41 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
      * A delayed exposure service timer
      */
     private static final ScheduledExecutorService DELAY_EXPORT_EXECUTOR = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("DubboServiceDelayExporter", true));
-
+    
+    /**
+     * 自适应扩展 Protocol 实现对象
+     */
     private static final Protocol PROTOCOL = ExtensionLoader.getExtensionLoader(Protocol.class).getAdaptiveExtension();
 
     /**
      * A {@link ProxyFactory} implementation that will generate a exported service proxy,the JavassistProxyFactory is its
      * default implementation
+     *
+     * 自适应扩展代理工厂 proxyFactory
+     *
      */
     private static final ProxyFactory PROXY_FACTORY = ExtensionLoader.getExtensionLoader(ProxyFactory.class).getAdaptiveExtension();
 
     /**
      * Whether the provider has been exported
+     *   已暴露服务
      */
     private transient volatile boolean exported;
 
     /**
      * The flag whether a service has unexported ,if the method unexported is invoked, the value is true
+     * 服务取消暴露标识,  调用时标识为true
      */
     private transient volatile boolean unexported;
 
     private DubboBootstrap bootstrap;
 
     /**
-     * The exported services
+     * The exported services 服务配置暴露地 Exporter
+     * 根据scope 范围进行暴露
+     * 1. scope 未设置时,会暴露 Local + Remote    一个URL 对应两个Exporter
+     * 2. scope 设置为空时, 不会暴露  URL 对一个 0 个Exporter
+     * 3. 设为为Local/Remote时, 一对一的关系
      */
     private final List<Exporter<?>> exporters = new ArrayList<Exporter<?>>();
 
@@ -344,18 +356,26 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
                 serviceMetadata
         );
 
+        // 加载注册中心的 URL 集合
         List<URL> registryURLs = ConfigValidationUtils.loadRegistries(this, true);
 
+        // 遍历protocols,暴露注册中心分组信息
         for (ProtocolConfig protocolConfig : protocols) {
             String pathKey = URL.buildKey(getContextPath(protocolConfig)
                     .map(p -> p + "/" + path)
                     .orElse(path), group, version);
             // In case user specified path, register service one more time to map it to path.
             repository.registerService(pathKey, interfaceClass);
+            // 基于单个协议,暴露服务
             doExportUrlsFor1Protocol(protocolConfig, registryURLs);
         }
     }
-
+    
+    /**
+     *
+     * @param protocolConfig   协议配置对象
+     * @param registryURLs     注册中心URL对象集合
+     */
     private void doExportUrlsFor1Protocol(ProtocolConfig protocolConfig, List<URL> registryURLs) {
         String name = protocolConfig.getName();
         if (StringUtils.isEmpty(name)) {
@@ -487,9 +507,11 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
 
             // export to local if the config is not remote (export to remote only when config is remote)
             if (!SCOPE_REMOTE.equalsIgnoreCase(scope)) {
+                // 本地暴露
                 exportLocal(url);
             }
             // export to remote if the config is not local (export to local only when config is local)
+            // 远程暴露
             if (!SCOPE_LOCAL.equalsIgnoreCase(scope)) {
                 if (CollectionUtils.isNotEmpty(registryURLs)) {
                     for (URL registryURL : registryURLs) {
@@ -545,15 +567,21 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
     @SuppressWarnings({"unchecked", "rawtypes"})
     /**
      * always export injvm
+     *
+     * 本地暴露服务
      */
     private void exportLocal(URL url) {
+        
+        // 创建本地 Dubbo URL
         URL local = URLBuilder.from(url)
-                .setProtocol(LOCAL_PROTOCOL)
-                .setHost(LOCALHOST_VALUE)
+                .setProtocol(LOCAL_PROTOCOL) // injvm
+                .setHost(LOCALHOST_VALUE)    // 127.0.0.1 本地
                 .setPort(0)
                 .build();
-        Exporter<?> exporter = PROTOCOL.export(
-                PROXY_FACTORY.getInvoker(ref, (Class) interfaceClass, local));
+        // 创建本地invoker调用服务 并使用 Protocol 暴露
+        // Protocol 有两个Wrapper扩展实现类:ProtocolFilterWrapper、ProtocolListenerWrapper
+        // #export(...) 方法此处调用顺序: Protocol$Adaptive ---> ProtocolFilterWrapper -->  ProtocolListenerWrapper --> InjvmExporter
+        Exporter<?> exporter = PROTOCOL.export(PROXY_FACTORY.getInvoker(ref, (Class) interfaceClass, local));
         exporters.add(exporter);
         logger.info("Export dubbo service " + interfaceClass.getName() + " to local registry url : " + local);
     }

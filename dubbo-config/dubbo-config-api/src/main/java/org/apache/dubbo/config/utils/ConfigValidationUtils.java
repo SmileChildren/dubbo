@@ -180,18 +180,31 @@ public class ConfigValidationUtils {
     public static final String IPV6_START_MARK = "[";
 
     public static final String IPV6_END_MARK = "]";
-
+    
+    /**
+     * 加载注册中心到 org.apache.dubbo.common.URL
+     * @param interfaceConfig
+     * @param provider     是否是服务提供者
+     * @return
+     */
     public static List<URL> loadRegistries(AbstractInterfaceConfig interfaceConfig, boolean provider) {
         // check && override if necessary
+        
+        //
         List<URL> registryList = new ArrayList<URL>();
+        //
         ApplicationConfig application = interfaceConfig.getApplication();
         List<RegistryConfig> registries = interfaceConfig.getRegistries();
         if (CollectionUtils.isNotEmpty(registries)) {
             for (RegistryConfig config : registries) {
+                // 获取注册中心地址
                 String address = config.getAddress();
                 if (StringUtils.isEmpty(address)) {
+                    //  0.0.0.0
                     address = ANYHOST_VALUE;
                 }
+                
+                // 非 N/A 的有效地址    [ N/A: 表示不配置注册中心 ]
                 if (!RegistryConfig.NO_AVAILABLE.equalsIgnoreCase(address)) {
                     Map<String, String> map = new HashMap<String, String>();
                     AbstractConfig.appendParameters(map, application);
@@ -199,18 +212,23 @@ public class ConfigValidationUtils {
                     map.put(PATH_KEY, RegistryService.class.getName());
                     AbstractInterfaceConfig.appendRuntimeParameters(map);
                     if (!map.containsKey(PROTOCOL_KEY)) {
+                        // protocol : dubbo
                         map.put(PROTOCOL_KEY, DUBBO_PROTOCOL);
                     }
+                    
+                    // 解析地址
                     List<URL> urls = UrlUtils.parseURLs(address, map);
-
+                    // 循环设置 "registry" 和 "protocol" 属性
                     for (URL url : urls) {
 
                         url = URLBuilder.from(url)
                                 .addParameter(REGISTRY_KEY, url.getProtocol())
                                 .setProtocol(extractRegistryType(url))
                                 .build();
+                        // 服务提供者 && 注册 || 服务消费者 && 订阅
                         if ((provider && url.getParameter(REGISTER_KEY, true))
                                 || (!provider && url.getParameter(SUBSCRIBE_KEY, true))) {
+                            // 添加到注册列表
                             registryList.add(url);
                         }
                     }

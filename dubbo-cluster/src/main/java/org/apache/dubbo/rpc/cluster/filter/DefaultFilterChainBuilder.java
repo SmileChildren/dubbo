@@ -29,12 +29,19 @@ public class DefaultFilterChainBuilder implements FilterChainBuilder {
 
     /**
      * build consumer/provider filter chain
+     *
+     * group:
+     *      暴露服务: provider
+     *      引用服务: consumer
      */
     @Override
     public <T> Invoker<T> buildInvokerChain(final Invoker<T> originalInvoker, String key, String group) {
         Invoker<T> last = originalInvoker;
+        
+        //todo: filters  获取过滤器集合
         List<Filter> filters = ExtensionLoader.getExtensionLoader(Filter.class).getActivateExtension(originalInvoker.getUrl(), key, group);
 
+        // 遍历 Filter链获取对应的 Invoker 对象
         if (!filters.isEmpty()) {
             for (int i = filters.size() - 1; i >= 0; i--) {
                 final Filter filter = filters.get(i);

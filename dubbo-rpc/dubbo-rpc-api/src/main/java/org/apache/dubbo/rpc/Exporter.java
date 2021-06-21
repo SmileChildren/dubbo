@@ -22,6 +22,10 @@ package org.apache.dubbo.rpc;
  * @see org.apache.dubbo.rpc.Protocol#export(Invoker)
  * @see org.apache.dubbo.rpc.ExporterListener
  * @see org.apache.dubbo.rpc.protocol.AbstractExporter
+ *
+ * InjvmExporter --- 继承 --->  AbstractExporter  |
+ *                                                 ---  实现 ---> Exporter
+ *                      ListenerExporterWrapper  |
  */
 public interface Exporter<T> {
 

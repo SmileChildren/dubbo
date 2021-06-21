@@ -39,12 +39,23 @@ import static org.apache.dubbo.rpc.Constants.SCOPE_REMOTE;
 
 /**
  * InjvmProtocol
+ *  Injvm 协议实现类
  */
 public class InjvmProtocol extends AbstractProtocol implements Protocol {
-
+    
+    /**
+     * 协议名 injvm
+     */
     public static final String NAME = LOCAL_PROTOCOL;
-
+    
+    /**
+     * 默认端口
+     */
     public static final int DEFAULT_PORT = 0;
+    
+    /**
+     * 单例,在Dubbo SPI 中只会被初始化一次
+     */
     private static InjvmProtocol INSTANCE;
 
     public InjvmProtocol() {
@@ -91,6 +102,7 @@ public class InjvmProtocol extends AbstractProtocol implements Protocol {
 
     @Override
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
+        // 创建 InjvmExporter 对象
         return new InjvmExporter<T>(invoker, invoker.getUrl().getServiceKey(), exporterMap);
     }
 

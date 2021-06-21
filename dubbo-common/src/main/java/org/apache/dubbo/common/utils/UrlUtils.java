@@ -66,7 +66,13 @@ public class UrlUtils {
      * in the url string,mark the param begin
      */
     private final static String URL_PARAM_STARTING_SYMBOL = "?";
-
+    
+    /**
+     * todo: read
+     * @param address
+     * @param defaults
+     * @return
+     */
     public static URL parseURL(String address, Map<String, String> defaults) {
         if (address == null || address.length() == 0) {
             return null;
@@ -88,6 +94,8 @@ public class UrlUtils {
                 url += URL_PARAM_STARTING_SYMBOL + RemotingConstants.BACKUP_KEY + "=" + backup.toString();
             }
         }
+        
+        //
         String defaultProtocol = defaults == null ? null : defaults.get(PROTOCOL_KEY);
         if (defaultProtocol == null || defaultProtocol.length() == 0) {
             defaultProtocol = DUBBO_PROTOCOL;
@@ -168,6 +176,8 @@ public class UrlUtils {
         if (address == null || address.length() == 0) {
             return null;
         }
+        
+        // 通过"|" 或者 ";"  进行分割,设置多个注册中心时使用
         String[] addresses = REGISTRY_SPLIT_PATTERN.split(address);
         if (addresses == null || addresses.length == 0) {
             return null; //here won't be empty
@@ -479,7 +489,12 @@ public class UrlUtils {
                 !ROUTE_PROTOCOL.equals(url.getProtocol()) &&
                 PROVIDERS_CATEGORY.equals(url.getCategory(PROVIDERS_CATEGORY));
     }
-
+    
+    /**
+     * 注册协议 || 服务发现注册 ||
+     * @param url
+     * @return
+     */
     public static boolean isRegistry(URL url) {
         return REGISTRY_PROTOCOL.equals(url.getProtocol())
                 || SERVICE_REGISTRY_PROTOCOL.equalsIgnoreCase(url.getProtocol())

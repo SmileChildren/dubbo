@@ -38,12 +38,19 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * abstract ProtocolSupport.
+ *  协议抽象层
  */
 public abstract class AbstractProtocol implements Protocol {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    protected final Map<String, Exporter<?>> exporterMap = new ConcurrentHashMap<String, Exporter<?>>();
+  /**
+   * Exporter 集合: 拥有协议中暴露的所有 Exporter对象
+   * InjvmProtocol 使用 URL#getServiceKey() 方法
+   * DubboProtocol 使用 #serviceKey(URL) 方法
+   * 主要差别为协议端口port, InjvmProtocol 统一使用 port =0
+   */
+  protected final Map<String, Exporter<?>> exporterMap =  new ConcurrentHashMap<String, Exporter<?>>();
 
     /**
      * <host:port, ProtocolServer>

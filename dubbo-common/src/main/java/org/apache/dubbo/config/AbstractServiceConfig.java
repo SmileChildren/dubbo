@@ -91,6 +91,8 @@ public abstract class AbstractServiceConfig extends AbstractInterfaceConfig {
     /**
      * The protocol list the service will export with
      * Also see {@link #protocolIds}, only one of them will work.
+     *
+     * 注册中心协议配置
      */
     protected List<ProtocolConfig> protocols;
 

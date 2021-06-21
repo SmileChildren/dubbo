@@ -31,9 +31,15 @@ import java.util.List;
 public class ListenerExporterWrapper<T> implements Exporter<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(ListenerExporterWrapper.class);
-
+    
+    /**
+     * Exporter 对象
+     */
     private final Exporter<T> exporter;
-
+    
+    /**
+     * Exporter 监听集合
+     */
     private final List<ExporterListener> listeners;
 
     public ListenerExporterWrapper(Exporter<T> exporter, List<ExporterListener> listeners) {
@@ -42,11 +48,13 @@ public class ListenerExporterWrapper<T> implements Exporter<T> {
         }
         this.exporter = exporter;
         this.listeners = listeners;
+        // 执行监听器
         if (CollectionUtils.isNotEmpty(listeners)) {
             RuntimeException exception = null;
             for (ExporterListener listener : listeners) {
                 if (listener != null) {
                     try {
+                        // 监听器暴露当前Exporter 对象
                         listener.exported(this);
                     } catch (RuntimeException t) {
                         logger.error(t.getMessage(), t);
@@ -54,6 +62,7 @@ public class ListenerExporterWrapper<T> implements Exporter<T> {
                     }
                 }
             }
+            // 最终才抛出异常信息
             if (exception != null) {
                 throw exception;
             }
@@ -70,11 +79,13 @@ public class ListenerExporterWrapper<T> implements Exporter<T> {
         try {
             exporter.unexport();
         } finally {
+            // 执行监听器
             if (CollectionUtils.isNotEmpty(listeners)) {
                 RuntimeException exception = null;
                 for (ExporterListener listener : listeners) {
                     if (listener != null) {
                         try {
+                            // 取消服务暴露
                             listener.unexported(this);
                         } catch (RuntimeException t) {
                             logger.error(t.getMessage(), t);
