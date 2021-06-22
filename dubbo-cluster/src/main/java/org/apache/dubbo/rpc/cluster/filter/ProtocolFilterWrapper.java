@@ -57,7 +57,7 @@ public class ProtocolFilterWrapper implements Protocol {
     @Override
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
         
-        // 已经注册时,直接返回暴露服务
+        // 当invoker.url.protocl 为registry时, 注册中心的URL, 无需创建 Filter 过滤链
         if (UrlUtils.isRegistry(invoker.getUrl())) {
             return protocol.export(invoker);
         }

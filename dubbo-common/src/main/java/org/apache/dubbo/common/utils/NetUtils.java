@@ -127,6 +127,7 @@ public class NetUtils {
         return ANYHOST_VALUE.equals(host);
     }
 
+    // 本地host校验
     public static boolean isInvalidLocalHost(String host) {
         return host == null
                 || host.length() == 0

@@ -299,23 +299,33 @@ public class ConfigValidationUtils {
                 url -> registryType.equals(url.getProtocol()) && registryURL.getBackupAddress().equals(url.getBackupAddress())
         );
     }
-
+    
+    /**
+     *  加载监控中心
+     * @param interfaceConfig
+     * @param registryURL
+     * @return
+     */
     public static URL loadMonitor(AbstractInterfaceConfig interfaceConfig, URL registryURL) {
         Map<String, String> map = new HashMap<String, String>();
+        // interface  监控服务名称
         map.put(INTERFACE_KEY, MonitorService.class.getName());
+        // 获取运行环境中dubbo 的参数信息
         AbstractInterfaceConfig.appendRuntimeParameters(map);
         //set ip
         String hostToRegistry = ConfigUtils.getSystemProperty(DUBBO_IP_TO_REGISTRY);
         if (StringUtils.isEmpty(hostToRegistry)) {
             hostToRegistry = NetUtils.getLocalHost();
         } else if (NetUtils.isInvalidLocalHost(hostToRegistry)) {
-            throw new IllegalArgumentException("Specified invalid registry ip from property:" +
-                    DUBBO_IP_TO_REGISTRY + ", value:" + hostToRegistry);
+            throw new IllegalArgumentException("Specified invalid registry ip from property:" + DUBBO_IP_TO_REGISTRY + ", value:" + hostToRegistry);
         }
+        // register.ip
         map.put(REGISTER_IP_KEY, hostToRegistry);
 
         MonitorConfig monitor = interfaceConfig.getMonitor();
         ApplicationConfig application = interfaceConfig.getApplication();
+        
+        //
         AbstractConfig.appendParameters(map, monitor);
         AbstractConfig.appendParameters(map, application);
         String address = null;
@@ -328,8 +338,10 @@ public class ConfigValidationUtils {
         if (ConfigUtils.isNotEmpty(address)) {
             if (!map.containsKey(PROTOCOL_KEY)) {
                 if (getExtensionLoader(MonitorFactory.class).hasExtension(LOGSTAT_PROTOCOL)) {
+                    // protocol : logstat
                     map.put(PROTOCOL_KEY, LOGSTAT_PROTOCOL);
                 } else {
+                    // protocol : dubbo
                     map.put(PROTOCOL_KEY, DUBBO_PROTOCOL);
                 }
             }
@@ -337,12 +349,17 @@ public class ConfigValidationUtils {
         } else if (monitor != null &&
                 (REGISTRY_PROTOCOL.equals(monitor.getProtocol()) || SERVICE_REGISTRY_PROTOCOL.equals(monitor.getProtocol()))
                 && registryURL != null) {
+            //  protocol = dubbo
+            //  parameters.protocol = registry
+            //  parameters.refer = map
             return URLBuilder.from(registryURL)
                     .setProtocol(DUBBO_PROTOCOL)
                     .addParameter(PROTOCOL_KEY, monitor.getProtocol())
                     .putAttribute(REFER_KEY, map)
                     .build();
         }
+        
+        // 无注册中心时,返回null
         return null;
     }
 

@@ -93,6 +93,7 @@ public class ServiceConfigURL extends URL {
         this(new PathURLAddress(protocol, username, password, path, host, port), URLParam.parse(parameters), attributes);
     }
 
+    @Override
     protected <T extends URL> T newURL(URLAddress urlAddress, URLParam urlParam) {
         return (T) new ServiceConfigURL(urlAddress, urlParam, attributes);
     }
