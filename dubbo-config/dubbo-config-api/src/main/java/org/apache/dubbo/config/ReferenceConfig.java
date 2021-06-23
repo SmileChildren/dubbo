@@ -232,7 +232,7 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
 
     protected synchronized void init() {
         
-        // 是否已经初始化操作
+        // 是否已经初始化操作 [ initialized 默认为false]
         if (initialized) {
             return;
         }

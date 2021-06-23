@@ -199,10 +199,12 @@ public abstract class ReferenceConfigBase<T> extends AbstractReferenceConfig {
         return null;
     }
 
+    @Override
     public String getInterface() {
         return interfaceName;
     }
 
+    @Override
     public void setInterface(String interfaceName) {
         this.interfaceName = interfaceName;
     }

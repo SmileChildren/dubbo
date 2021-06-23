@@ -140,6 +140,7 @@ public abstract class AbstractServiceConfig extends AbstractInterfaceConfig {
         return version;
     }
 
+    @Override
     public void setVersion(String version) {
         this.version = version;
     }
@@ -148,6 +149,7 @@ public abstract class AbstractServiceConfig extends AbstractInterfaceConfig {
         return group;
     }
 
+    @Override
     public void setGroup(String group) {
         this.group = group;
     }

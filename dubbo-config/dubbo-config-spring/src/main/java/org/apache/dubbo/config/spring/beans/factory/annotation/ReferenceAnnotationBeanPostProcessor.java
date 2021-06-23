@@ -308,6 +308,7 @@ public class ReferenceAnnotationBeanPostProcessor extends AbstractAnnotationBean
         return ReferenceBean.class.getName().equals(beanDefinition.getBeanClassName());
     }
 
+    @Override
     protected void prepareInjection(AnnotatedInjectionMetadata metadata) throws BeansException {
         try {
             //find and registry bean definition for @DubboReference/@Reference

@@ -81,6 +81,9 @@ public @interface Reference {
 
     /**
      * Check if service provider is available during boot up, default value is true
+     * 在启动期间检查服务提供者是否可用,默认为true
+     * org.apache.dubbo.config.ReferenceConfig#get()
+     *
      */
     boolean check() default true;
 
