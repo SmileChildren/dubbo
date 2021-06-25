@@ -42,6 +42,9 @@ import static org.apache.dubbo.common.constants.CommonConstants.INVOCATION_INTER
 import static org.apache.dubbo.common.constants.CommonConstants.REFERENCE_FILTER_KEY;
 import static org.apache.dubbo.common.constants.CommonConstants.REFERENCE_INTERCEPTOR_KEY;
 
+/**
+ *  参考文章 https://blog.csdn.net/g6U8W7p06dCO99fQ3/article/details/104352236
+ */
 public abstract class AbstractCluster implements Cluster {
 
     private <T> Invoker<T> buildClusterInterceptors(AbstractClusterInvoker<T> clusterInvoker, String key) {

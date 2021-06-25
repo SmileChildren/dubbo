@@ -25,9 +25,15 @@ import org.apache.dubbo.rpc.RpcException;
 import static org.apache.dubbo.rpc.Constants.DEPRECATED_KEY;
 
 /**
- * DeprecatedProtocolFilter
+ * DeprecatedProtocolFilter 引用废弃的服务时,打印错误日志
+ *
+ * 远程引用服务配置: <dubbo:service interface="com.alibaba.dubbo.demo.DemoService" ref="demoService" deprecated="true" />
+ * 本地引用服务配置:
+ *    <dubbo:reference id="demoService" nterface="com.alibaba.dubbo.demo.DemoService" protocol="injvm">
+ *        <dubbo:parameter key="deprecated" value="true" />
+ *    </dubbo:reference>
  */
-@Activate(DEPRECATED_KEY)
+@Activate(DEPRECATED_KEY) // 基于 Dubbo SPI Activate 机制加载
 public class DeprecatedInvokerListener extends InvokerListenerAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeprecatedInvokerListener.class);

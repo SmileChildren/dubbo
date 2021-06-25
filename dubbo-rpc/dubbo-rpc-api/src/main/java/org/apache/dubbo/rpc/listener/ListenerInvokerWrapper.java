@@ -34,9 +34,15 @@ import java.util.List;
 public class ListenerInvokerWrapper<T> implements Invoker<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(ListenerInvokerWrapper.class);
-
+    
+    /**
+     * 实际调用对象
+     */
     private final Invoker<T> invoker;
-
+    
+    /**
+     * 监听集合
+     */
     private final List<InvokerListener> listeners;
 
     public ListenerInvokerWrapper(Invoker<T> invoker, List<InvokerListener> listeners) {
@@ -45,6 +51,7 @@ public class ListenerInvokerWrapper<T> implements Invoker<T> {
         }
         this.invoker = invoker;
         this.listeners = listeners;
+        // 执行监听器
         if (CollectionUtils.isNotEmpty(listeners)) {
             for (InvokerListener listener : listeners) {
                 if (listener != null) {
@@ -88,12 +95,14 @@ public class ListenerInvokerWrapper<T> implements Invoker<T> {
         try {
             invoker.destroy();
         } finally {
+            // Invoker 销毁时,执行监听器
             if (CollectionUtils.isNotEmpty(listeners)) {
                 for (InvokerListener listener : listeners) {
                     if (listener != null) {
                         try {
                             listener.destroyed(invoker);
                         } catch (Throwable t) {
+                            // 异常打印
                             logger.error(t.getMessage(), t);
                         }
                     }

@@ -57,6 +57,7 @@ public abstract class ReferenceConfigBase<T> extends AbstractReferenceConfig {
     protected String client;
 
     /**
+     * 直连服务提供者地址
      * The url for peer-to-peer invocation
      */
     protected String url;

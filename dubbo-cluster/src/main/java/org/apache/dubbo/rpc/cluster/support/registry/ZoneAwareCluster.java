@@ -21,6 +21,12 @@ import org.apache.dubbo.rpc.cluster.Directory;
 import org.apache.dubbo.rpc.cluster.support.AbstractClusterInvoker;
 import org.apache.dubbo.rpc.cluster.support.wrapper.AbstractCluster;
 
+/**
+ * 多注册中心订阅场景选址时,先寻找对应的注册中心  即注册中心集群间的负载均衡
+ *
+ * 选址时会根据zone key匹配
+ * <dubbo:registry address="zookeeper://${zookeeper.address1}" zone="beijing" />
+ */
 public class ZoneAwareCluster extends AbstractCluster {
 
     public final static String NAME = "zone-aware";

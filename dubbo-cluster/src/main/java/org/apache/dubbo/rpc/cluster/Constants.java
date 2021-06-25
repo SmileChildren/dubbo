@@ -98,6 +98,7 @@ public interface Constants {
     String STATE_ROUTER_KEY="stateRouter";
     /**
      * The key name for reference URL in register center
+     * 注册中心引用URL名称
      */
     String REFER_KEY = "refer";
 

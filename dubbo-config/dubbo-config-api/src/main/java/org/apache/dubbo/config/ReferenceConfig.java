@@ -95,15 +95,22 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
      * The {@link Protocol} implementation with adaptive functionality,it will be different in different scenarios.
      * A particular {@link Protocol} implementation is determined by the protocol attribute in the {@link URL}.
      * For example:
-     *
      * <li>when the url is registry://224.5.6.7:1234/org.apache.dubbo.registry.RegistryService?application=dubbo-sample,
      * then the protocol is <b>RegistryProtocol</b></li>
-     *
      * <li>when the url is dubbo://224.5.6.7:1234/org.apache.dubbo.config.api.DemoService?application=dubbo-sample, then
      * the protocol is <b>DubboProtocol</b></li>
      * <p>
      * Actually，when the {@link ExtensionLoader} init the {@link Protocol} instants,it will automatically wraps two
      * layers, and eventually will get a <b>ProtocolFilterWrapper</b> or <b>ProtocolListenerWrapper</b>
+     *
+     *
+     *  Protocol 实现了自适应功能,在不同的场景下将会有不同的实现. 特定的Protocol实现由URL中的protocol 属性决定
+     * -- url :  registry://224.5.6.7:1234/org.apache.dubbo.registry.RegistryService?application=dubbo-sample
+     *    则对应的protocol为 RegistryProtocol
+     * -- url :  dubbo://224.5.6.7:1234/org.apache.dubbo.config.api.DemoService?application=dubbo-sample
+     *  则对应的protocol为 DubboProtocol
+     *
+     * 实际上,当ExtensionLoader 初始化Protocol 实例时,会自动包装两个包装类,最终得到 ProtocolFilterWrapper、ProtocolListenerWrapper包装类
      */
     private static final Protocol REF_PROTOCOL = ExtensionLoader.getExtensionLoader(Protocol.class).getAdaptiveExtension();
 
@@ -347,15 +354,21 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
 
     @SuppressWarnings({"unchecked", "rawtypes", "deprecation"})
     private T createProxy(Map<String, String> map) {
+        
+        // 判断是否本地引用
         if (shouldJvmRefer(map)) {
+            // 创建服务引用的 URL 对象
             URL url = new ServiceConfigURL(LOCAL_PROTOCOL, LOCALHOST_VALUE, 0, interfaceClass.getName()).addParameters(map);
+            // 引用服务,返回 Invoker 对象
             invoker = REF_PROTOCOL.refer(interfaceClass, url);
             if (logger.isInfoEnabled()) {
                 logger.info("Using injvm service " + interfaceClass.getName());
             }
+            // 一般情况下为远程引用
         } else {
             urls.clear();
-            if (url != null && url.length() > 0) { // user specified URL, could be peer-to-peer address, or register center's address.
+            if (url != null && url.length() > 0) {
+                // user specified URL, could be peer-to-peer address, or register center's address.  直连或者注册中心获取URL
                 String[] us = SEMICOLON_SPLIT_PATTERN.split(url);
                 if (us != null && us.length > 0) {
                     for (String u : us) {
@@ -372,8 +385,8 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
                         }
                     }
                 }
-            } else { // assemble URL from register center's configuration
-                // if protocols not injvm checkRegistry
+            } else { // assemble URL from register center's configuration  从注册中心的配置组装URL
+                // if protocols not injvm checkRegistry  忽略injvm 中的注册的协议
                 if (!LOCAL_PROTOCOL.equalsIgnoreCase(getProtocol())) {
                     checkRegistry();
                     List<URL> us = ConfigValidationUtils.loadRegistries(this, false);
@@ -381,8 +394,10 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
                         for (URL u : us) {
                             URL monitorUrl = ConfigValidationUtils.loadMonitor(this, u);
                             if (monitorUrl != null) {
+                                // monitor
                                 u = u.putAttribute(MONITOR_KEY, monitorUrl);
                             }
+                            // refer
                             urls.add(u.putAttribute(REFER_KEY, map));
                         }
                     }
@@ -401,10 +416,11 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
                 List<Invoker<?>> invokers = new ArrayList<Invoker<?>>();
                 URL registryURL = null;
                 for (URL url : urls) {
-                    // For multi-registry scenarios, it is not checked whether each referInvoker is available.
-                    // Because this invoker may become available later.
+                    // For multi-registry scenarios, it is not checked whether each referInvoker is available. Because this invoker may become available later.
+                    // 多注册表场景下,不检查每个 referInvoker 是否可用. invoker 调用可能稍后可能可用
                     invokers.add(REF_PROTOCOL.refer(interfaceClass, url));
 
+                    // 服务注册/发现后 获得可用的 url
                     if (UrlUtils.isRegistry(url)) {
                         registryURL = url; // use last registry url
                     }
@@ -520,11 +536,11 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
         URL tmpUrl = new ServiceConfigURL("temp", "localhost", 0, map);
         boolean isJvmRefer;
         if (isInjvm() == null) {
-            // if a url is specified, don't do local reference
+            // if a url is specified, don't do local reference  直连URL存在,非本地引用
             if (url != null && url.length() > 0) {
                 isJvmRefer = false;
             } else {
-                // by default, reference local service if there is
+                // by default, reference local service if there is  默认情况下如果本地服务存在则引用
                 isJvmRefer = InjvmProtocol.getInjvmProtocol().isInjvmRefer(tmpUrl);
             }
         } else {

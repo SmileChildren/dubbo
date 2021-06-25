@@ -74,16 +74,19 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
 
     /**
      * {@link Invoker} default attachment
+     *  公用的隐式传参
      */
     private final Map<String, Object> attachment;
 
     /**
      * {@link Node} available
+     * 是否可用
      */
     private volatile boolean available = true;
 
     /**
      * {@link Node} destroy
+     * 是否销毁
      */
     private boolean destroyed = false;
 

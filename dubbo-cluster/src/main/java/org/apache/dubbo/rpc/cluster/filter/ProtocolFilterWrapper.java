@@ -39,8 +39,7 @@ import static org.apache.dubbo.common.constants.CommonConstants.SERVICE_FILTER_K
 public class ProtocolFilterWrapper implements Protocol {
 
     private final Protocol protocol;
-    private static final FilterChainBuilder builder
-            = ExtensionLoader.getExtensionLoader(FilterChainBuilder.class).getDefaultExtension();
+    private static final FilterChainBuilder builder = ExtensionLoader.getExtensionLoader(FilterChainBuilder.class).getDefaultExtension();
 
     public ProtocolFilterWrapper(Protocol protocol) {
         if (protocol == null) {
@@ -65,12 +64,24 @@ public class ProtocolFilterWrapper implements Protocol {
         // 建立带有 Filter 过滤链的 Invoker后暴露服务
         return protocol.export(builder.buildInvokerChain(invoker, SERVICE_FILTER_KEY, CommonConstants.PROVIDER));
     }
-
+    
+    /**
+     *
+     * @param type Service class
+     * @param url  URL address for the remote service  远程调用服务URL地址
+     * @param <T>
+     * @return
+     * @throws RpcException
+     */
     @Override
     public <T> Invoker<T> refer(Class<T> type, URL url) throws RpcException {
+        
+        // 注册中心获取Invoker 无需包装 || 本地引用服务
         if (UrlUtils.isRegistry(url)) {
             return protocol.refer(type, url);
         }
+        
+        // consumer: 引用服务将 Invoker 对象包装成带有 Filter 过滤链的Invoker 对象
         return builder.buildInvokerChain(protocol.refer(type, url), REFERENCE_FILTER_KEY, CommonConstants.CONSUMER);
     }
 

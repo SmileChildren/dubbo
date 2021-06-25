@@ -43,9 +43,15 @@ import static org.apache.dubbo.rpc.Constants.ASYNC_KEY;
  * InjvmInvoker
  */
 class InjvmInvoker<T> extends AbstractInvoker<T> {
-
+    
+    /**
+     * 服务键
+     */
     private final String key;
-
+    
+    /**
+     * Exporter 集合
+     */
     private final Map<String, Exporter<?>> exporterMap;
 
     private final ExecutorRepository executorRepository = ExtensionLoader.getExtensionLoader(ExecutorRepository.class).getDefaultExtension();
@@ -55,9 +61,14 @@ class InjvmInvoker<T> extends AbstractInvoker<T> {
         this.key = key;
         this.exporterMap = exporterMap;
     }
-
+    
+    /**
+     * 启动检查时校验Invoker对象是否有对应的Exporter, 若不存在说明依赖服务不存在检查不通过
+     * @return
+     */
     @Override
     public boolean isAvailable() {
+        // 判断是否存在 Exporter
         InjvmExporter<?> exporter = (InjvmExporter<?>) exporterMap.get(key);
         if (exporter == null) {
             return false;

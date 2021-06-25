@@ -112,25 +112,29 @@ public class InjvmProtocol extends AbstractProtocol implements Protocol {
     }
 
     public boolean isInjvmRefer(URL url) {
-        String scope = url.getParameter(SCOPE_KEY);
-        // Since injvm protocol is configured explicitly, we don't need to set any extra flag, use normal refer process.
-        if (SCOPE_LOCAL.equals(scope) || (url.getParameter(LOCAL_PROTOCOL, false))) {
+    // 读取配置信息 <dubbo:service scope="local" />
+    String scope = url.getParameter(SCOPE_KEY);
+    // Since injvm protocol is configured explicitly, we don't need to set any extra flag, use
+    // normal refer process.
+    // 不推荐使用 <dubbo:service injvm="true" />  <dubbo:reference protocol="injvm" />
+    if (SCOPE_LOCAL.equals(scope) || (url.getParameter(LOCAL_PROTOCOL, false))) {
             // if it's declared as local reference
             // 'scope=local' is equivalent to 'injvm=true', injvm will be deprecated in the future release
             return true;
         } else if (SCOPE_REMOTE.equals(scope)) {
-            // it's declared as remote reference
+            // it's declared as remote reference  声明为远程调用
             return false;
         } else if (url.getParameter(GENERIC_KEY, false)) {
-            // generic invocation is not local reference
+            // generic invocation is not local reference 泛型调用不是本地引用
             return false;
+            // 当本地已经有该 Exporter 时,本地引用
         } else if (getExporter(exporterMap, url) != null) {
-            // Broadcast cluster means that multiple machines will be called,
-            // which is not converted to injvm protocol at this time.
+            // Broadcast cluster means that multiple machines will be called, which is not converted to injvm protocol at this time.
+            // 广播集群意味着将调用多台机器,此时不会转换为 injvm 协议
             if (BROADCAST_CLUSTER.equalsIgnoreCase(url.getParameter(CLUSTER_KEY))) {
                 return false;
             }
-            // by default, go through local reference if there's the service exposed locally
+            // by default, go through local reference if there's the service exposed locally  默认情况下,若服务在本地公开则本地引用
             return true;
         } else {
             return false;

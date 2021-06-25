@@ -205,7 +205,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
     protected void checkRegistry() {
         // 初始化 RegisterConfig 属性信息
         convertRegistryIdsToRegistries();
-
+        
         for (RegistryConfig registryConfig : registries) {
             if (!registryConfig.isValid()) {
                 throw new IllegalStateException("No registry config found or it's not a valid config! " +

@@ -49,11 +49,13 @@ public abstract class AbstractReferenceConfig extends AbstractInterfaceConfig {
 
     /**
      * Whether to use generic interface
+     * 是否使用通用接口
      */
     protected String generic;
 
     /**
      * Whether to find reference's instance from the current JVM
+     * 是否从当前JVM 中查找引用的实例[过期]
      */
     protected Boolean injvm;
 
