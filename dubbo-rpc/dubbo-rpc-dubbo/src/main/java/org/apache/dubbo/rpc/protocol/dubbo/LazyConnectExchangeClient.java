@@ -40,6 +40,7 @@ import static org.apache.dubbo.rpc.protocol.dubbo.Constants.DEFAULT_LAZY_CONNECT
 
 /**
  * dubbo protocol support class.
+ * 支持懒连接服务器的信息交换客户端
  */
 @SuppressWarnings("deprecation")
 final class LazyConnectExchangeClient implements ExchangeClient {
@@ -50,15 +51,33 @@ final class LazyConnectExchangeClient implements ExchangeClient {
     protected static final String REQUEST_WITH_WARNING_KEY = "lazyclient_request_with_warning";
     private final static Logger logger = LoggerFactory.getLogger(LazyConnectExchangeClient.class);
     protected final boolean requestWithWarning;
+    
     private final URL url;
+    
+    /**
+     * 通道处理器
+     */
     private final ExchangeHandler requestHandler;
+    
+    /**
+     * 连接锁
+     */
     private final Lock connectLock = new ReentrantLock();
     private final int warning_period = 5000;
     /**
      * lazy connect, initial state for connection
+     *  懒连接没有初始化的连接状态
      */
     private final boolean initialState;
+    
+    /**
+     * 通信客户端
+     */
     private volatile ExchangeClient client;
+    
+    /**
+     * 警告计数器, 每超过一定次数,打印警告日志
+     */
     private AtomicLong warningcount = new AtomicLong(0);
 
     public LazyConnectExchangeClient(URL url, ExchangeHandler requestHandler) {
@@ -76,13 +95,17 @@ final class LazyConnectExchangeClient implements ExchangeClient {
         if (logger.isInfoEnabled()) {
             logger.info("Lazy connect to " + url);
         }
+        
+        //
         connectLock.lock();
         try {
             if (client != null) {
                 return;
             }
+            // 创建 Client, 连接服务器
             this.client = Exchangers.connect(url, requestHandler);
         } finally {
+            // 释放锁
             connectLock.unlock();
         }
     }
@@ -133,10 +156,12 @@ final class LazyConnectExchangeClient implements ExchangeClient {
      * If {@link #REQUEST_WITH_WARNING_KEY} is configured, then warn once every 5000 invocations.
      */
     private void warning() {
+        // 开启
         if (requestWithWarning) {
             if (warningcount.get() % warning_period == 0) {
                 logger.warn(new IllegalStateException("safe guard client , should not be called ,must have a bug."));
             }
+            // 增加计数
             warningcount.incrementAndGet();
         }
     }
@@ -149,6 +174,7 @@ final class LazyConnectExchangeClient implements ExchangeClient {
 
     @Override
     public boolean isConnected() {
+        // 客户端未初始化
         if (client == null) {
             return initialState;
         } else {

@@ -43,11 +43,13 @@ public interface HttpServer extends Resetable, RemotingServer {
      *
      * @return local address.
      */
+    @Override
     InetSocketAddress getLocalAddress();
 
     /**
      * close the channel.
      */
+    @Override
     void close();
 
     /**
@@ -67,6 +69,7 @@ public interface HttpServer extends Resetable, RemotingServer {
      *
      * @return closed
      */
+    @Override
     boolean isClosed();
 
 }

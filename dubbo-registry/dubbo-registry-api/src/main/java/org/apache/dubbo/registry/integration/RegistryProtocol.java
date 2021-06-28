@@ -120,8 +120,12 @@ import static org.apache.dubbo.rpc.cluster.Constants.WEIGHT_KEY;
 
 /**
  * TODO, replace RegistryProtocol completely in the future.
+ *
+ * 将要完全取代 RegistryProtocol
  */
 public class RegistryProtocol implements Protocol {
+    
+    
     public static final String[] DEFAULT_REGISTER_PROVIDER_KEYS = {
             APPLICATION_KEY, CODEC_KEY, EXCHANGER_KEY, SERIALIZATION_KEY, CLUSTER_KEY, CONNECTIONS_KEY, DEPRECATED_KEY,
             GROUP_KEY, LOADBALANCE_KEY, MOCK_KEY, PATH_KEY, TIMEOUT_KEY, TOKEN_KEY, VERSION_KEY, WARMUP_KEY,
@@ -398,9 +402,11 @@ public class RegistryProtocol implements Protocol {
     }
 
     protected URL getRegistryUrl(URL url) {
+        //  service-discovery-registry
         if (SERVICE_REGISTRY_PROTOCOL.equals(url.getProtocol())) {
             return url;
         }
+        // registry : service-discovery-registry
         return url.addParameter(REGISTRY_KEY, url.getProtocol()).setProtocol(SERVICE_REGISTRY_PROTOCOL);
     }
 
@@ -468,6 +474,8 @@ public class RegistryProtocol implements Protocol {
     @Override
     @SuppressWarnings("unchecked")
     public <T> Invoker<T> refer(Class<T> type, URL url) throws RpcException {
+        
+        //
         url = getRegistryUrl(url);
         Registry registry = registryFactory.getRegistry(url);
         if (RegistryService.class.equals(type)) {
@@ -486,7 +494,17 @@ public class RegistryProtocol implements Protocol {
         Cluster cluster = Cluster.getCluster(qs.get(CLUSTER_KEY));
         return doRefer(cluster, registry, type, url, qs);
     }
-
+    
+    /**
+     *
+     * @param cluster
+     * @param registry
+     * @param type
+     * @param url
+     * @param parameters
+     * @param <T> Invoker 泛型对象
+     * @return
+     */
     protected <T> Invoker<T> doRefer(Cluster cluster, Registry registry, Class<T> type, URL url, Map<String, String> parameters) {
         Map<String, Object> consumerAttribute = new HashMap<>(url.getAttributes());
         consumerAttribute.remove(REFER_KEY);

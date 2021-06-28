@@ -41,14 +41,31 @@ import static org.apache.dubbo.rpc.protocol.dubbo.Constants.LAZY_CONNECT_INITIAL
 final class ReferenceCountExchangeClient implements ExchangeClient {
 
     private final static Logger logger = LoggerFactory.getLogger(ReferenceCountExchangeClient.class);
+    
+    /**
+     * URL
+     */
     private final URL url;
+    
+    /**
+     * 引用指向数量
+     */
     private final AtomicInteger referenceCount = new AtomicInteger(0);
+    
+    /**
+     * 断开指向数量
+     */
     private final AtomicInteger disconnectCount = new AtomicInteger(0);
     private final Integer maxDisconnectCount = 50;
+    
+    /**
+     * 客户端
+     */
     private ExchangeClient client;
 
     public ReferenceCountExchangeClient(ExchangeClient client) {
         this.client = client;
+        // 指向 +1
         referenceCount.incrementAndGet();
         this.url = client.getUrl();
     }
