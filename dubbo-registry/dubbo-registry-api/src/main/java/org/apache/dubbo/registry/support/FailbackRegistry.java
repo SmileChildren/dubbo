@@ -42,6 +42,7 @@ import static org.apache.dubbo.registry.Constants.REGISTRY_RETRY_PERIOD_KEY;
 
 /**
  * FailbackRegistry. (SPI, Prototype, ThreadSafe)
+ * 支持失败重试的Registry 抽象类
  */
 public abstract class FailbackRegistry extends AbstractRegistry {
 
@@ -60,11 +61,15 @@ public abstract class FailbackRegistry extends AbstractRegistry {
      */
     private final int retryPeriod;
 
-    // Timer for failure retry, regular check if there is a request for failure, and if there is, an unlimited retry
+    /**
+     * 定时任务执行器
+     * Timer for failure retry, regular check if there is a request for failure, and if there is, an unlimited retry
+     */
     private final HashedWheelTimer retryTimer;
 
     public FailbackRegistry(URL url) {
         super(url);
+        // 重试间隔时间段: 5 * 1000
         this.retryPeriod = url.getParameter(REGISTRY_RETRY_PERIOD_KEY, DEFAULT_REGISTRY_RETRY_PERIOD);
 
         // since the retry task will not be very much. 128 ticks is enough.

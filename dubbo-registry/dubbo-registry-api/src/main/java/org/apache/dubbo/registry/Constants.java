@@ -83,6 +83,7 @@ public interface Constants {
     String REGISTRY_RETRY_TIMES_KEY = "retry.times";
 
     /**
+     * 注册表中心重试间隔的时间段
      * Period of registry center's retry interval
      */
     String REGISTRY_RETRY_PERIOD_KEY = "retry.period";

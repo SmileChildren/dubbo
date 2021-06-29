@@ -23,13 +23,28 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 public interface ZookeeperClient {
-
+    
+    /**
+     * 节点创建
+     * @param path         节点路径
+     * @param ephemeral    是否临时节点
+     */
     void create(String path, boolean ephemeral);
-
+    
+    /**
+     * 节点删除
+     * @param path
+     */
     void delete(String path);
 
     List<String> getChildren(String path);
-
+    
+    /**
+     * 添加 ChildListener
+     * @param path
+     * @param listener
+     * @return    子节点列表
+     */
     List<String> addChildListener(String path, ChildListener listener);
 
     /**
@@ -46,17 +61,32 @@ public interface ZookeeperClient {
     void addDataListener(String path, DataListener listener, Executor executor);
 
     void removeDataListener(String path, DataListener listener);
-
+    
+    /**
+     *  移除 ChildListener
+     * @param path
+     * @param listener
+     */
     void removeChildListener(String path, ChildListener listener);
 
     void addStateListener(StateListener listener);
 
     void removeStateListener(StateListener listener);
-
+    
+    /**
+     * @return  是否连接
+     */
     boolean isConnected();
-
+    
+    /**
+     * 关闭
+     */
     void close();
-
+    
+    /**
+     * 获取注册中心 URL
+     * @return
+     */
     URL getUrl();
 
     void create(String path, String content, boolean ephemeral);

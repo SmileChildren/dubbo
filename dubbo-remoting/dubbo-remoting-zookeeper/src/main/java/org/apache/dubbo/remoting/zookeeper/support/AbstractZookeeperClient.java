@@ -33,23 +33,40 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
 
+/**
+ *
+ * @param <TargetDataListener>    数据监听器
+ * @param <TargetChildListener>   节点监听器
+ */
 public abstract class AbstractZookeeperClient<TargetDataListener, TargetChildListener> implements ZookeeperClient {
 
     protected static final Logger logger = LoggerFactory.getLogger(AbstractZookeeperClient.class);
 
     protected int DEFAULT_CONNECTION_TIMEOUT_MS = 5 * 1000;
     protected int DEFAULT_SESSION_TIMEOUT_MS = 60 * 1000;
-
+    
+    /**
+     *
+     */
     private final URL url;
-
+    
+    /**
+     *  StateListener 集合
+     */
     private final Set<StateListener> stateListeners = new CopyOnWriteArraySet<StateListener>();
+    
+    /**
+     *  ChildListener 集合
+     *  key : 节点路径
+     *  value: ChildListener 对象
+     */
+    private final ConcurrentMap<String, ConcurrentMap<ChildListener, TargetChildListener>> childListeners = new ConcurrentHashMap<String, ConcurrentMap<ChildListener, TargetChildListener>>();
 
-    private final ConcurrentMap<String, ConcurrentMap<ChildListener, TargetChildListener>> childListeners =
-            new ConcurrentHashMap<String, ConcurrentMap<ChildListener, TargetChildListener>>();
-
-    private final ConcurrentMap<String, ConcurrentMap<DataListener, TargetDataListener>> listeners =
-            new ConcurrentHashMap<String, ConcurrentMap<DataListener, TargetDataListener>>();
-
+    private final ConcurrentMap<String, ConcurrentMap<DataListener, TargetDataListener>> listeners = new ConcurrentHashMap<String, ConcurrentMap<DataListener, TargetDataListener>>();
+    
+    /**
+     * 是否关闭
+     */
     private volatile boolean closed = false;
 
     private final Set<String> persistentExistNodePath = new ConcurrentHashSet<>();
@@ -74,21 +91,29 @@ public abstract class AbstractZookeeperClient<TargetDataListener, TargetChildLis
     @Override
     public void create(String path, boolean ephemeral) {
         if (!ephemeral) {
+            // 判断持久节点是否包含当前路径
             if (persistentExistNodePath.contains(path)) {
                 return;
             }
+            
+            // 节点是否存在
             if (checkExists(path)) {
                 persistentExistNodePath.add(path);
                 return;
             }
         }
+        
+        // 循环创建父路径
         int i = path.lastIndexOf('/');
         if (i > 0) {
             create(path.substring(0, i), false);
         }
+        
+        // 创建临时节点
         if (ephemeral) {
             createEphemeral(path);
         } else {
+            // 创建持久节点
             createPersistent(path);
             persistentExistNodePath.add(path);
         }
@@ -110,8 +135,12 @@ public abstract class AbstractZookeeperClient<TargetDataListener, TargetChildLis
 
     @Override
     public List<String> addChildListener(String path, final ChildListener listener) {
+        
+        // 获取路径下所有的监听器
         ConcurrentMap<ChildListener, TargetChildListener> listeners = childListeners.computeIfAbsent(path, k -> new ConcurrentHashMap<>());
+        // 判断是否有该监听器 [ createTargetChildListener ]
         TargetChildListener targetListener = listeners.computeIfAbsent(listener, k -> createTargetChildListener(path, k));
+        // 发起订阅
         return addTargetChildListener(path, targetListener);
     }
 
@@ -144,11 +173,16 @@ public abstract class AbstractZookeeperClient<TargetDataListener, TargetChildLis
         if (listeners != null) {
             TargetChildListener targetListener = listeners.remove(listener);
             if (targetListener != null) {
+                // 取消订阅
                 removeTargetChildListener(path, targetListener);
             }
         }
     }
-
+    
+    /**
+     * StateListener 集合回调
+     * @param state
+     */
     protected void stateChanged(int state) {
         for (StateListener sessionListener : getSessionListeners()) {
             sessionListener.stateChanged(state);
@@ -162,6 +196,7 @@ public abstract class AbstractZookeeperClient<TargetDataListener, TargetChildLis
         }
         closed = true;
         try {
+            // 关闭连接
             doClose();
         } catch (Throwable t) {
             logger.warn(t.getMessage(), t);
@@ -228,7 +263,13 @@ public abstract class AbstractZookeeperClient<TargetDataListener, TargetChildLis
 
     @Override
     public abstract boolean checkExists(String path);
-
+    
+    /**
+     * 创建 ChildListener 对象,每个Zookeeper的库实现不同
+     * @param path
+     * @param listener
+     * @return
+     */
     protected abstract TargetChildListener createTargetChildListener(String path, ChildListener listener);
 
     protected abstract List<String> addTargetChildListener(String path, TargetChildListener listener);

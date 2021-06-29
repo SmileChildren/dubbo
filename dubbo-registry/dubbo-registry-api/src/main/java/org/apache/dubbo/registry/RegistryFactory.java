@@ -25,24 +25,40 @@ import org.apache.dubbo.common.extension.SPI;
  *
  * @see org.apache.dubbo.registry.support.AbstractRegistryFactory
  */
-@SPI("dubbo")
+@SPI("dubbo")  //  Dubbo SPI 拓展接口
 public interface RegistryFactory {
 
+  /**
+   * Connect to the registry
+   *
+   * <p>Connecting the registry needs to support the contract: <br>
+   * 1. When the check=false is set, the connection is not checked, otherwise the exception is
+   * thrown when disconnection <br>
+   * 2. Support username:password authority authentication on URL.<br>
+   * 3. Support the backup=10.20.153.10 candidate registry cluster address.<br>
+   * 4. Support file=registry.cache local disk file cache.<br>
+   * 5. Support the timeout=1000 request timeout setting.<br>
+   * 6. Support session=60000 session timeout or expiration settings.<br>
+   * 连接注册中心
+   *
+   * 连接注册中心需处理契约：
+   * 1. 当设置check=false时表示不检查连接，否则在连接不上时抛出异常
+   * 2. 支持URL上的username:password权限认证
+   * 3. 支持backup=10.20.153.10备选注册中心集群地址
+   * 4. 支持file=registry.cache本地磁盘文件缓存
+   * 5. 支持timeout=1000请求超时设置
+   * 6. 支持session=60000会话超时或过期设置
+   *
+   * @param url Registry address, is not allowed to be empty
+   * @return Registry reference, never return empty value
+   */
+    
     /**
-     * Connect to the registry
-     * <p>
-     * Connecting the registry needs to support the contract: <br>
-     * 1. When the check=false is set, the connection is not checked, otherwise the exception is thrown when disconnection <br>
-     * 2. Support username:password authority authentication on URL.<br>
-     * 3. Support the backup=10.20.153.10 candidate registry cluster address.<br>
-     * 4. Support file=registry.cache local disk file cache.<br>
-     * 5. Support the timeout=1000 request timeout setting.<br>
-     * 6. Support session=60000 session timeout or expiration settings.<br>
-     *
-     * @param url Registry address, is not allowed to be empty
-     * @return Registry reference, never return empty value
+     * Dubbo SPI 会自动实现 RegistryFactory$Adaptive 类
+     *  url.protocol 获取对应的 RegistryFactory实现类,例: url.protocol = zookeeper 时,获取 ZookeeperRegistryFactory实现类
+     * @param url
+     * @return  获取注册中心 Registry 对象
      */
-    @Adaptive({"protocol"})
-    Registry getRegistry(URL url);
-
+  @Adaptive({"protocol"})
+  Registry getRegistry(URL url);
 }

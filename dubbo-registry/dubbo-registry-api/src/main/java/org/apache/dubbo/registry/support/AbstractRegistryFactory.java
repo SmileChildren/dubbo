@@ -44,6 +44,7 @@ import static org.apache.dubbo.rpc.cluster.Constants.REFER_KEY;
 
 /**
  * AbstractRegistryFactory. (SPI, Singleton, ThreadSafe)
+ * 实现Registry 容器管理
  *
  * @see org.apache.dubbo.registry.RegistryFactory
  */
@@ -51,11 +52,17 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
 
     // Log output
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRegistryFactory.class);
-
-    // The lock for the acquisition process of the registry
+    
+    /**
+     * The lock for the acquisition process of the registry
+     * 用于 destroyAll() 和 getRegistry(url) 方法对 Registries访问的竞争
+     */
     protected static final ReentrantLock LOCK = new ReentrantLock();
-
-    // Registry Collection Map<RegistryAddress, Registry>
+    
+    /**
+     * Registry Collection Map<RegistryAddress, Registry>
+     * Registry 集合
+     */
     protected static final Map<String, Registry> REGISTRIES = new HashMap<>();
 
     private static final AtomicBoolean destroyed = new AtomicBoolean(false);
@@ -68,7 +75,12 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
     public static Collection<Registry> getRegistries() {
         return Collections.unmodifiableCollection(new LinkedList<>(REGISTRIES.values()));
     }
-
+    
+    /**
+     * 从缓存中获取Registry 对象
+     * @param key
+     * @return
+     */
     public static Registry getRegistry(String key) {
         return REGISTRIES.get(key);
     }
@@ -126,44 +138,55 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
         }
         return null;
     }
-
+    
+    /**
+     * 获取注册中心Registry 对象
+     * @param url
+     * @return
+     */
     @Override
     public Registry getRegistry(URL url) {
 
+        // 注册中心是否销毁
         Registry defaultNopRegistry = getDefaultNopRegistryIfDestroyed();
         if (null != defaultNopRegistry) {
             return defaultNopRegistry;
         }
 
+        // 修改 URL
         url = URLBuilder.from(url)
                 .setPath(RegistryService.class.getName())
                 .addParameter(INTERFACE_KEY, RegistryService.class.getName())
                 .removeParameters(EXPORT_KEY, REFER_KEY, TIMESTAMP_KEY)
                 .build();
+        // 计算key
         String key = createRegistryCacheKey(url);
         // Lock the registry access process to ensure a single instance of the registry
+        // 确保单一实例是否被注册
         LOCK.lock();
         try {
-            // double check
+            // double check 再次校验销毁状态
             // fix https://github.com/apache/dubbo/issues/7265.
             defaultNopRegistry = getDefaultNopRegistryIfDestroyed();
             if (null != defaultNopRegistry) {
                 return defaultNopRegistry;
             }
-
+    
+            // 从缓存中获得 Registry 对象
             Registry registry = REGISTRIES.get(key);
             if (registry != null) {
                 return registry;
             }
-            //create registry by spi/ioc
+            //create registry by spi/ioc  通过spi/ioc 创建Registry对象
             registry = createRegistry(url);
             if (registry == null) {
                 throw new IllegalStateException("Can not create registry " + url);
             }
+            // 添加缓存
             REGISTRIES.put(key, registry);
             return registry;
         } finally {
-            // Release the lock
+            // 释放锁
             LOCK.unlock();
         }
     }
@@ -171,7 +194,7 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
     /**
      * Create the key for the registries cache.
      * This method may be override by the sub-class.
-     *
+     *  创建 registries 缓存,子类将会重写该方法
      * @param url the registration {@link URL url}
      * @return non-null
      */

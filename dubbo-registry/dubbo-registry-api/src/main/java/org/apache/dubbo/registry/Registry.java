@@ -26,8 +26,10 @@ import static org.apache.dubbo.common.constants.CommonConstants.REGISTRY_DELAY_N
  *
  * @see org.apache.dubbo.registry.RegistryFactory#getRegistry(URL)
  * @see org.apache.dubbo.registry.support.AbstractRegistry
+ * @see org.apache.dubbo.common.Node  (API/SPI, Prototype, ThreadSafe)  拥有节点相关的方法
  */
 public interface Registry extends Node, RegistryService {
+    
     default int getDelay() {
         return getUrl().getParameter(REGISTRY_DELAY_NOTIFICATION_KEY, 5000);
     }

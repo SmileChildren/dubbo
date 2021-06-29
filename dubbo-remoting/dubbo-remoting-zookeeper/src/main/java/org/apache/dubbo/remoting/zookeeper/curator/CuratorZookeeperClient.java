@@ -52,7 +52,10 @@ import java.util.concurrent.TimeUnit;
 
 import static org.apache.dubbo.common.constants.CommonConstants.TIMEOUT_KEY;
 
-
+/**
+ * 基本是最佳的选择
+ * Sharding-JDBC、Elastic-Job 等等中间都选择了 Curator 连接 Zookeeper
+ */
 public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZookeeperClient.NodeCacheListenerImpl, CuratorZookeeperClient.CuratorWatcherImpl> {
 
     protected static final Logger logger = LoggerFactory.getLogger(CuratorZookeeperClient.class);
@@ -65,19 +68,26 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
     public CuratorZookeeperClient(URL url) {
         super(url);
         try {
+            
             int timeout = url.getParameter(TIMEOUT_KEY, DEFAULT_CONNECTION_TIMEOUT_MS);
             int sessionExpireMs = url.getParameter(ZK_SESSION_EXPIRE_KEY, DEFAULT_SESSION_TIMEOUT_MS);
+            
+            // 创建client 对象
             CuratorFrameworkFactory.Builder builder = CuratorFrameworkFactory.builder()
-                    .connectString(url.getBackupAddress())
-                    .retryPolicy(new RetryNTimes(1, 1000))
-                    .connectionTimeoutMs(timeout)
+                    .connectString(url.getBackupAddress())  //连接地址
+                    .retryPolicy(new RetryNTimes(1, 1000))  // 重试策略, 重试1次间隔1000ms
+                    .connectionTimeoutMs(timeout) // 连接超时时间 5000
                     .sessionTimeoutMs(sessionExpireMs);
             String authority = url.getAuthority();
             if (authority != null && authority.length() > 0) {
                 builder = builder.authorization("digest", authority.getBytes());
             }
             client = builder.build();
+            
+            // 添加连接监听器
             client.getConnectionStateListenable().addListener(new CuratorConnectionStateListener(url));
+            
+            // 启动 client
             client.start();
             boolean connected = client.blockUntilConnected(timeout, TimeUnit.MILLISECONDS);
             if (!connected) {

@@ -21,9 +21,15 @@ import org.apache.dubbo.common.extension.Adaptive;
 import org.apache.dubbo.common.extension.SPI;
 import org.apache.dubbo.remoting.Constants;
 
-@SPI("curator")
+@SPI("curator") // 使用 Dubbo SPI 机制，默认使用 Curator 实现
 public interface ZookeeperTransporter {
-
+    
+    
+    /**
+     * 创建ZookeeperClient 对象连接
+     * @param url  注册中心地址
+     * @return ZookeeperClient 对象
+     */
     @Adaptive({Constants.CLIENT_KEY, Constants.TRANSPORTER_KEY})
     ZookeeperClient connect(URL url);
 
