@@ -703,7 +703,7 @@ public class URLParam {
     }
 
     /**
-     * remove specified parameters in URLParam
+     * todo: remove specified parameters in URLParam
      *
      * @param keys keys to being removed
      * @return A new URLParam

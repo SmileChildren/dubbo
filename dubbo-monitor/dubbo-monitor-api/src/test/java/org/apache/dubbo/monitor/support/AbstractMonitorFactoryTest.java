@@ -49,9 +49,11 @@ public class AbstractMonitorFactoryTest {
                 public void destroy() {
                 }
 
+                @Override
                 public void collect(URL statistics) {
                 }
 
+                @Override
                 public List<URL> lookup(URL query) {
                     return null;
                 }

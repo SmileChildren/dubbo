@@ -82,10 +82,12 @@ public class DubboMonitorTest {
     private volatile URL lastStatistics;
     private final MonitorService monitorService = new MonitorService() {
 
+        @Override
         public void collect(URL statistics) {
             DubboMonitorTest.this.lastStatistics = statistics;
         }
 
+        @Override
         public List<URL> lookup(URL query) {
             return Arrays.asList(DubboMonitorTest.this.lastStatistics);
         }

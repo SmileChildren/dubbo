@@ -34,7 +34,10 @@ public interface StateListener {
     int RECONNECTED = 2;
 
     int SUSPENDED = 3;
-
+    
+    /**
+     * 新创建的连接
+     */
     int NEW_SESSION_CREATED = 4;
     
     /**

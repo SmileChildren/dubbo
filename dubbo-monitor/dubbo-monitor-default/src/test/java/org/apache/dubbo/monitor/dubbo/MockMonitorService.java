@@ -29,6 +29,7 @@ public class MockMonitorService implements MonitorService {
 
     private URL statistics;
 
+    @Override
     public void collect(URL statistics) {
         this.statistics = statistics;
     }
@@ -37,6 +38,7 @@ public class MockMonitorService implements MonitorService {
         return statistics;
     }
 
+    @Override
     public List<URL> lookup(URL query) {
         return Arrays.asList(statistics);
     }

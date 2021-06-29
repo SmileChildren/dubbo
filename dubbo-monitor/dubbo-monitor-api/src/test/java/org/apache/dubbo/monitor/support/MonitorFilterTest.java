@@ -100,10 +100,12 @@ public class MonitorFilterTest {
                 public void destroy() {
                 }
 
+                @Override
                 public void collect(URL statistics) {
                     MonitorFilterTest.this.lastStatistics = statistics;
                 }
 
+                @Override
                 public List<URL> lookup(URL query) {
                     return Arrays.asList(MonitorFilterTest.this.lastStatistics);
                 }

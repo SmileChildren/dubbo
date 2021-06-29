@@ -68,13 +68,27 @@ public abstract class CacheableFailbackRegistry extends FailbackRegistry {
 
     protected final static Map<String, URLAddress> stringAddress = new ConcurrentHashMap<>();
     protected final static Map<String, URLParam> stringParam = new ConcurrentHashMap<>();
+    
+    /**
+     *
+     */
     private static final ScheduledExecutorService cacheRemovalScheduler;
+    
     private static final int cacheRemovalTaskIntervalInMillis;
     private static final int cacheClearWaitingThresholdInMillis;
+    
+    /**
+     *
+     */
     private final static Map<ServiceAddressURL, Long> waitForRemove = new ConcurrentHashMap<>();
+    /**
+     *
+     */
     private static final Semaphore semaphore = new Semaphore(1);
 
     private final Map<String, String> extraParameters;
+    
+    
     protected final Map<URL, Map<String, ServiceAddressURL>> stringUrls = new HashMap<>();
 
     static {
@@ -115,8 +129,11 @@ public abstract class CacheableFailbackRegistry extends FailbackRegistry {
                 logger.info("Evicting urls for service " + url.getServiceKey() + ", size " + oldURLs.size());
                 Long currentTimestamp = System.currentTimeMillis();
                 for (Map.Entry<String, ServiceAddressURL> entry : oldURLs.entrySet()) {
+                    // 等待回收
                     waitForRemove.put(entry.getValue(), currentTimestamp);
                 }
+                
+                // 尝试回收移除
                 if (CollectionUtils.isNotEmptyMap(waitForRemove)) {
                     if (semaphore.tryAcquire()) {
                         cacheRemovalScheduler.schedule(new RemovalTask(), cacheRemovalTaskIntervalInMillis, TimeUnit.MILLISECONDS);
@@ -127,7 +144,13 @@ public abstract class CacheableFailbackRegistry extends FailbackRegistry {
             logger.warn("Failed to evict url for " + url.getServiceKey(), e);
         }
     }
-
+    
+    /**
+     * todo
+     * @param consumer
+     * @param providers
+     * @return
+     */
     protected List<URL> toUrlsWithoutEmpty(URL consumer, Collection<String> providers) {
         // keep old urls
         Map<String, ServiceAddressURL> oldURLs = stringUrls.get(consumer);
@@ -167,23 +190,34 @@ public abstract class CacheableFailbackRegistry extends FailbackRegistry {
 
         return new ArrayList<>(newURLs.values());
     }
-
+    
+    /**
+     *
+     * @param consumer 用于匹配 URL
+     * @param path   被匹配的URL 的字符串
+     * @param providers  匹配URL 数组
+     * @return
+     */
     protected List<URL> toUrlsWithEmpty(URL consumer, String path, Collection<String> providers) {
         List<URL> urls = new ArrayList<>(1);
+        // PATH 是否以"providers" 结尾
         boolean isProviderPath = path.endsWith(PROVIDERS_CATEGORY);
         if (isProviderPath) {
             if (CollectionUtils.isNotEmpty(providers)) {
                 urls = toUrlsWithoutEmpty(consumer, providers);
             } else {
                 // clear cache on empty notification: unsubscribe or provider offline
+                // 清空通知时清除缓存：取消订阅或提供商脱机
                 evictURLCache(consumer);
             }
+            
         } else {
             if (CollectionUtils.isNotEmpty(providers)) {
                 urls = toConfiguratorsWithoutEmpty(consumer, providers);
             }
         }
-
+    
+        // 若不存在匹配,则创建 `empty://` 的URL返回
         if (urls.isEmpty()) {
             int i = path.lastIndexOf(PATH_SEPARATOR);
             String category = i < 0 ? path : path.substring(i + 1);
@@ -270,8 +304,11 @@ public abstract class CacheableFailbackRegistry extends FailbackRegistry {
         List<URL> urls = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(configurators)) {
             for (String provider : configurators) {
+                // provider 中包含 `://`
                 if (provider.contains(PROTOCOL_SEPARATOR_ENCODED)) {
+                    // 路径进行解析
                     URL url = URLStrParser.parseEncodedStr(provider);
+                    // 匹配
                     if (UrlUtils.isMatch(consumer, url)) {
                         urls.add(url);
                     }
